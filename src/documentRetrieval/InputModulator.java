@@ -8,6 +8,13 @@
 package documentRetrieval;
 import java.io.IOException;
 import java.nio.file.Paths;
+
+import org.apache.lucene.document.Document;
+import org.apache.lucene.queryparser.classic.ParseException;
+
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
+
 import java.nio.file.Path;
 
 //import java.util.*;
@@ -55,7 +62,20 @@ public class InputModulator {
 		System.out.println(+numberofIndexedFiles+"Files Indexed, Time Taken : "+(timeatEnd-timeatStart)+"milli seconds");	
 	}
 	
-	
+	public static void searcher(String searchQueryEntered) throws IOException, ParseException
+	{
+		Searcher newSearcher = new Searcher(indexPathEntered);
+		Long timeatStart = System.currentTimeMillis();
+		TopDocs noOfHits = newSearcher.search(searchQueryEntered);
+		Long timeatEnd = System.currentTimeMillis();
+		System.out.println(+noOfHits.totalHits+"documents Searched, Time Taken : "+(timeatEnd-timeatStart)+"milli seconds");
+		
+		for(ScoreDoc scorer : noOfHits.scoreDocs)
+		{
+			Document document = newSearcher.documentGetter(scorer);
+			System.out.println("File Found "+document.get(GlobalConstants.FILE_PATH));
+		}
+	}
 	
 	
 	public static void main(String[] args) throws InvalidInputException {
@@ -84,7 +104,9 @@ public class InputModulator {
 		//System.out.printf(" %s \n %s \n %s \n %s",indexPathEntered, docsPathEntered, args[2], query);	
 		try { 
 			InputModulator.indexCreator(); } catch(IOException e) { e.printStackTrace(); }
-	
+		try {
+			InputModulator.searcher(query); } catch (IOException e) {e.printStackTrace(); } 
+											  catch(ParseException e) { e.printStackTrace(); }
+		}
 	}
-	
-}
+
