@@ -3,6 +3,7 @@ package documentRetrieval;
 import java.io.*;
 import java.nio.file.Paths;
 
+
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -18,6 +19,7 @@ import org.apache.lucene.store.FSDirectory;
 public class Indexer {
 	
 	private IndexWriter Iwriter;
+	//String pathtoData;
 	public Indexer(String pathToIndex) throws IOException
 	{
 		
@@ -36,6 +38,14 @@ public class Indexer {
 		TextField content;
 		Field fileName;
 		Field filePath;
+		if(newfile.getName().endsWith(".htm") || newfile.getName().endsWith(".html"))
+		{
+			
+			System.out.println("File type Html : "+newfile.getCanonicalPath());
+			File newHtmltoTxtFile = htmlParser.htmltotxt(newfile);
+			getDocument(newHtmltoTxtFile);
+									
+		}
      		content = new TextField(GlobalConstants.CONTENTS,new FileReader(newfile));
 			fileName = new StringField(GlobalConstants.FILE_NAME,newfile.getName(),Field.Store.YES);
 			filePath = new StringField(GlobalConstants.FILE_PATH,newfile.getCanonicalPath(),Field.Store.YES);
@@ -51,6 +61,7 @@ public class Indexer {
 	}
 		
 	public int createIndexDirectory(String dataDirPath,	FileFilter filter) throws IOException{
+		//pathtoData = dataDirPath;
 		File[] files = new File(dataDirPath).listFiles();
 		for(File fileIterator : files) {
 			if(!fileIterator.isHidden() && fileIterator.exists() && fileIterator.canRead() && filter.accept(fileIterator)) {

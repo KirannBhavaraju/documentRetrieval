@@ -23,7 +23,7 @@ class InvalidInputException extends Exception
 {
 	public String toString()
 	{
-		//System.err.println("Please enter VS/OK as third Argument for ranking Scheme. Type -h or -- help fpr more details");
+		//System.err.println("Please enter VS/OK as third Argument for ranking Scheme. Type -h or -- help for more details");
 		//System.exit(1);
 		return "Please enter VS/OK as third Argument for ranking Scheme. Type -h or -- help for more information";
 	}
