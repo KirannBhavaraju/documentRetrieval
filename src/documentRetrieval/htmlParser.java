@@ -17,11 +17,20 @@ import java.io.IOException;
 
 
 public class htmlParser {
+	
+	public static void printTitle(String searchedfilePath) throws IOException
+	{
+		//System.out.println(searchedfilePath);
+		File tempFile = new File(searchedfilePath);
+		Document jdoctemp = Jsoup.parse(tempFile, "UTF-8");
+		System.out.println("Title : "+jdoctemp.title());
+	}
+	
 	//private static final String UTF16;
 	private static String createFileName(Path pathEntered, File file)
 	{
 		String name=null;
-			name = pathEntered.toString() + "\\" +file.getName().toString() + ".txt" ;
+		name = pathEntered.toString() + "\\.\\" +file.getName().toString()+".txt" ;
 		//System.out.println(Paths.get(name).toString());
 		return Paths.get(name).toString();
 	}
@@ -33,6 +42,7 @@ public class htmlParser {
 		
 		Document newHtlmDoc = Jsoup.parse(file,"UTF-8");
 		Elements titles = newHtlmDoc.getElementsByTag("title");
+		
 		//Elements paragraphs = newHtlmDoc.getElementsByTag("p");
 		Elements body = newHtlmDoc.getElementsByTag("body");
 		BufferedWriter newWriter;

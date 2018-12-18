@@ -6,8 +6,9 @@
  */
 
 package documentRetrieval;
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.util.Scanner;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -15,7 +16,10 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 
+import java.nio.file.Paths;
+import java.nio.file.Files;
 import java.nio.file.Path;
+
 
 //import java.util.*;
 @SuppressWarnings("serial")
@@ -34,15 +38,20 @@ class InvalidInputException extends Exception
 public class InputModulator {
 	static Path indexPathEntered=null;
 	static Path docsPathEntered=null;
+	public static int rankflag = 0;
+	
 	public static void setRankingScheme(String identifier)  throws InvalidInputException
 	{
 		if(identifier.contentEquals("VS"))
 		{
-			// Ranking Scheme code goes here
+			System.out.println("The Ranking Scheme has been set to Vector Space");
+			System.out.println("\n");
 		}
 		else if (identifier.contentEquals("OK"))
 		{
-			// Ranking Scheme code goes here
+			rankflag =1;
+			System.out.println("The Ranking Scheme has been set to Okapi Best Match 25");
+			System.out.println("\n");
 		}
 		else
 		{
@@ -50,6 +59,42 @@ public class InputModulator {
 		}
 	}
 	
+	public static char indexDirectoryCheck() throws IOException
+	{
+		char flag = '\0';
+		if(Files.list(Paths.get(indexPathEntered.toString())).findAny().isPresent())
+		{
+			System.out.printf("\n \n ------- \n");
+			System.out.println("Index Directory is not empty");
+			System.out.printf("\n \n ------- \n");
+			System.out.println("Press Y to use the existing Index and skip indexing");
+			System.out.println("Press E to empty the existing index Directory and start new Indexing");
+			System.out.println("\n");
+			System.out.println("Waiting for input -- ");
+			Scanner newScanner = new Scanner(System.in);
+			flag = newScanner.next().charAt(0);
+			newScanner.close();
+			if (flag == 'E' || flag == 'e')
+			{
+				File directory = new File(indexPathEntered.toString());
+				File[] files = directory.listFiles();
+				for(File afile : files)
+				{
+					 afile.delete();
+				}
+			}
+			else if (flag == 'y' || flag == 'Y')
+			{
+				return flag;			
+			}
+			else
+			{
+				System.out.println("Please Re-run the application with valid input, type in --help or -h for help");
+				System.exit(1);
+			}
+		}
+		return flag;
+	}
 	
 	public static void indexCreator() throws IOException
 	{
@@ -59,7 +104,9 @@ public class InputModulator {
 		numberofIndexedFiles = newIndexer.createIndexDirectory(docsPathEntered.toString(), new FileSelector());
 		Long timeatEnd = System.currentTimeMillis();
 		newIndexer.close();
-		System.out.println(+numberofIndexedFiles+"Files Indexed, Time Taken : "+(timeatEnd-timeatStart)+"milli seconds");	
+		System.out.println("\n");
+		System.out.println(+numberofIndexedFiles+"Files Indexed, Time Taken : "+(timeatEnd-timeatStart)+"milli seconds");
+		System.out.println("\n");
 	}
 	
 	public static void searcher(String searchQueryEntered) throws IOException, ParseException
@@ -68,17 +115,34 @@ public class InputModulator {
 		Long timeatStart = System.currentTimeMillis();
 		TopDocs noOfHits = newSearcher.search(searchQueryEntered);
 		Long timeatEnd = System.currentTimeMillis();
+		System.out.println("\n");
 		System.out.println(+noOfHits.totalHits+"documents Searched, Time Taken : "+(timeatEnd-timeatStart)+"milli seconds");
-		
+		System.out.println("\n");
+		int n=0;
 		for(ScoreDoc scorer : noOfHits.scoreDocs)
 		{
+			n += 1;
 			Document document = newSearcher.documentGetter(scorer);
-			System.out.println("File Found "+document.get(GlobalConstants.FILE_PATH));
+			System.out.println("File Found : ");
+			System.out.println("Printing Details");
+			System.out.println("Name : " +document.get(GlobalConstants.FILE_NAME));
+			System.out.println("Path : " +document.get(GlobalConstants.FILE_PATH));
+			if(document.get(GlobalConstants.FILE_PATH).endsWith(".html"))
+			{
+				String temp = document.get(GlobalConstants.FILE_PATH);
+				htmlParser.printTitle(temp);
+			}
+			Float score = scorer.score;
+			int DocId = scorer.doc;
+			System.out.println("Rank : " +n);
+			System.out.println("Relevance Score : " +score);
+			System.out.println("Document Id : " +DocId);
+			System.out.println("\n");
 		}
 	}
 	
 	
-	public static void main(String[] args) throws InvalidInputException {
+	public static void main(String[] args) throws InvalidInputException , IOException {
 		
 		for(int index=0; index<args.length; index++) {
 			if(args[index].contentEquals("--help") || args[index].contentEquals("-h"))
@@ -101,9 +165,15 @@ public class InputModulator {
 		{
 			query = query + " " + args[index];
 		}
+		
 		//System.out.printf(" %s \n %s \n %s \n %s",indexPathEntered, docsPathEntered, args[2], query);	
+		
+		char indexflag = indexDirectoryCheck();    // might throw IO Exception which is un-handled hence, modificatiion to the main
+		if(indexflag != 'Y' && indexflag != 'y')
+		{
 		try { 
 			InputModulator.indexCreator(); } catch(IOException e) { e.printStackTrace(); }
+		}
 		try {
 			InputModulator.searcher(query); } catch (IOException e) {e.printStackTrace(); } 
 											  catch(ParseException e) { e.printStackTrace(); }
