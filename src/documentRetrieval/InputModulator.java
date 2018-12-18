@@ -59,9 +59,10 @@ public class InputModulator {
 		}
 	}
 	
-	public static char indexDirectoryCheck() throws IOException
+	public static char indexDirectoryCheck()
 	{
 		char flag = '\0';
+		try {
 		if(Files.list(Paths.get(indexPathEntered.toString())).findAny().isPresent())
 		{
 			System.out.printf("\n \n ------- \n");
@@ -92,6 +93,15 @@ public class InputModulator {
 				System.out.println("Please Re-run the application with valid input, type in --help or -h for help");
 				System.exit(1);
 			}
+			}
+		}
+		catch (IOException e) { }
+		File Directory = new File(indexPathEntered.toString());
+		if(!Directory.exists())
+		{
+			System.out.println("Directory Created for Index");
+			System.out.println("\n");
+			flag = 't';
 		}
 		return flag;
 	}
@@ -156,9 +166,13 @@ public class InputModulator {
 				System.exit(1);
 				}
 		}
-
-		indexPathEntered = Paths.get(args[0]) ;
-		docsPathEntered= Paths.get(args[1]);
+			if(args.length < 4)
+			{
+				System.out.println(" You Possibly missed an argument or mis-typed it, use flag -h or --h for help ");
+				System.exit(1);
+			}
+		docsPathEntered= Paths.get(args[0]);
+		indexPathEntered = Paths.get(args[1]) ;
 		setRankingScheme(args[2]);
 		String query=null;
 		for(int index=3; index<args.length; index++)
@@ -169,7 +183,7 @@ public class InputModulator {
 		//System.out.printf(" %s \n %s \n %s \n %s",indexPathEntered, docsPathEntered, args[2], query);	
 		
 		char indexflag = indexDirectoryCheck();    // might throw IO Exception which is un-handled hence, modificatiion to the main
-		if(indexflag != 'Y' && indexflag != 'y')
+		if((indexflag != 'Y' && indexflag != 'y') || indexflag == 't')
 		{
 		try { 
 			InputModulator.indexCreator(); } catch(IOException e) { e.printStackTrace(); }
