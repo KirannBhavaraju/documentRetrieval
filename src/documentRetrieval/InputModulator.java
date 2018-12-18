@@ -148,8 +148,8 @@ public class InputModulator {
 			if(args[index].contentEquals("--help") || args[index].contentEquals("-h"))
 				{
 				System.out.println("DocumentRetrieval System Versioning 1.0");
-				System.out.println("Argument 1 : Path to documents Forlder");
-				System.out.println("Argument 2 : Path to the index Folder");
+				System.out.println("Argument 1 : Path to documents Forlder : Please Enter as String in Double-Quotes");
+				System.out.println("Argument 2 : Path to the index Folder : Please Enter as String in Double-Quotes");
 				System.out.println("Argument 3 : Set Ranking Scheme, Vector Space Mode (VS) or OKAPI25 (OK)");
 				System.out.println("Argument 4 : Search Query");
 				System.out.println("java -jar IR P.jar [path to document folder] [path to index folder] [VS/OK] [query]");
